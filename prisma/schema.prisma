@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model people_user {
+  id            Int       @id @default(autoincrement())
+  f_name        String?
+  l_name        String?
+  full_name     String?
+  n_name        String?
+  age           BigInt
+  rule          Int?
+  total_subject Decimal?  @db.Decimal
+  update_at     DateTime? @default(now()) @db.Timestamptz(6)
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  status        String?
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model rule_list {
+  id               Int       @id @default(autoincrement())
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  update_at        DateTime? @default(now()) @db.Timestamptz(6)
+  rule_name        String?
+  rule_description String?
+  status           String?
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model title_list {
+  id         Int       @id @default(autoincrement())
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  update_at  DateTime? @default(now()) @db.Timestamptz(6)
+  title_name String?
+  status     String?
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model todo_list {
+  id          Int       @id(map: "todolist_pkey") @default(autoincrement())
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  description String?
+  update_at   DateTime? @default(now()) @db.Timestamptz(6)
+  who_create  String?
+  who_id      Int?
+  title_id    Int?
+  status      String?
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model user_profile {
+  id         Int      @id @default(autoincrement())
+  first_name String?
+  last_name  String?
+  role       String?
+  avatar     String?
+  email      String?
+  location   String?
+  status     String?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model social_list {
+  id         BigInt   @id @default(autoincrement())
+  name       String?
+  icon       String?
+  link       String?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  user_id    Int?
+  status     String?
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model menu_list {
+  id         Int      @id @default(autoincrement())
+  level_id   Int?
+  name       String?
+  status     String?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model show_case {
+  id          Int       @id @default(autoincrement())
+  year        Int
+  title       String?
+  description String?
+  icon        String?
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  user_id     Int?
+  update_at   DateTime? @default(now()) @db.Timestamp(6)
+}
