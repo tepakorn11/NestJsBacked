@@ -15,7 +15,9 @@ export class ShowCaseService {
 
       const created = await this.prisma.show_case.create({
         data: {
-          ..._realData
+          ..._realData,
+          start_working: new Date(_realData.start_working).getTime(),
+          end_working: new Date(_realData.end_working).getTime(),
         }
       })
       return created;
@@ -28,6 +30,7 @@ export class ShowCaseService {
   async findAll() {
     try {
       const result = await this.prisma.show_case.findMany({
+        orderBy: { start_working: 'asc' },
       });
       if (!result) {
         throw new NotFoundException('ไม่พบรายการ');
@@ -67,7 +70,10 @@ export class ShowCaseService {
         const result = await this.prisma.show_case.update({
           where: { id: dto.id, user_id },
           data: {
-            ...dto
+            ...dto,
+            start_working: new Date(dto.start_working).getTime(),
+            end_working: new Date(dto.end_working).getTime(),
+
           }
         });
         updateScore++;
