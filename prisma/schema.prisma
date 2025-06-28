@@ -92,12 +92,25 @@ model menu_list {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model show_case {
+  id            Int       @id @default(autoincrement())
+  start_working Int
+  business_name String?
+  description   String?
+  icon          String?
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  user_id       Int?
+  update_at     DateTime? @default(now()) @db.Timestamp(6)
+  salary        Int?
+  end_working   Int?
+  status        String?
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model road_map {
   id          Int       @id @default(autoincrement())
   year        Int
-  title       String?
+  title       String
   description String?
   icon        String?
-  created_at  DateTime  @default(now()) @db.Timestamptz(6)
-  user_id     Int?
-  update_at   DateTime? @default(now()) @db.Timestamp(6)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
 }
