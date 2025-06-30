@@ -1,18 +1,15 @@
-FROM node:20-alpine
+# base image
+FROM node:18
 
+# create app directory
 WORKDIR /app
 
+# install dependencies
 COPY package*.json ./
 RUN npm install
 
+# copy source
 COPY . .
 
-RUN npm run build
-RUN npx prisma generate
-RUN npx prisma migrate deploy
-
-
-EXPOSE 3001
-
-# ✅ Push schema ก่อน start server
-CMD ["sh", "-c", "npx prisma db push && node dist/src/main"]
+# default command (override by docker-compose)
+CMD ["npm", "run", "start:dev"]

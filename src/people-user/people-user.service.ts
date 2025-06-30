@@ -4,10 +4,14 @@ import { PrismaService } from '../prisma/prisma.service'; // ✅ เพิ่ม
 import { Injectable, Logger, BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { toCamelCase } from 'utils/camel-case';
 import { findAllUser } from '../interface/people-user'
-
+import Redis from 'ioredis';
+import { Inject } from '@nestjs/common';
 @Injectable()
 export class PeopleUserService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService,
+    @Inject('REDIS_CLIENT') private redis: Redis,
+
+  ) { }
   private readonly logger = new Logger(PeopleUserService.name);
 
   async create(createPeopleUserDto: CreatePeopleUserDto) {
@@ -38,12 +42,19 @@ export class PeopleUserService {
   async findAll(query: { type_query: string, rule: number, status: string }) {
     try {
       const { type_query = '', rule = 0, status = '' } = query;
-
       const safeStatus = String(status ?? '');
       const safeRule = Number(rule ?? 0);
-      const result = await this.prisma.$queryRaw<findAllUser[]>
-        ` 
-     Select t1.id as user_id,
+
+      const cacheKey = `people_user:all:type=${type_query}:rule=${safeRule}:status=${safeStatus}`;
+
+      const cached = await this.redis.get(cacheKey);
+      if (cached) {
+        this.logger.log(`✅ Return people_user from cache`);
+        return JSON.parse(cached);
+      }
+
+      const result = await this.prisma.$queryRaw<findAllUser[]>`
+      Select t1.id as user_id,
             f_name,
             l_name,
             n_name,
@@ -56,15 +67,17 @@ export class PeopleUserService {
       Left Join rule_list t2 On t1.rule = t2.id
       Where (${safeStatus} = '' OR t1.status = ${safeStatus})
       And (${safeRule} = 0 Or t1.rule = ${safeRule})
-     `
-      // return toCamelCase(result);
-      return (result);
+    `;
 
+      await this.redis.set(cacheKey, JSON.stringify(result), 'EX', 300);
+
+      return result;
     } catch (error) {
-      this.logger.error('Failed to find people_user', error.stack)
-
+      this.logger.error('Failed to find people_user', error.stack);
+      throw error;
     }
   }
+
 
 
   async findOne(id: number) {
@@ -138,10 +151,10 @@ export class PeopleUserService {
 
       })
 
-      return  (_updateStatus)
+      return (_updateStatus)
 
     } catch (error) {
-      this.logger.error('failed to update status' , error.stack)
+      this.logger.error('failed to update status', error.stack)
 
     }
   }
