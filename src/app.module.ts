@@ -10,10 +10,11 @@ import { MenuModule } from './menu/menu.module';
 import { RoadMapModule } from './road-map/road-map.module';
 import { AppService }    from './app.service';
 import { RedisModule } from './redis/redis.module'; 
+import { WeatherModule } from './weather/weather.module';
 
 @Module({
   controllers:[AppController],
   providers:  [AppService, PrismaService],
-  imports: [PeopleUserModule, PrismaModule, ProfileModule, ShowCaseModule, MenuModule, RoadMapModule ,RedisModule],
+  imports: [PeopleUserModule, PrismaModule, ProfileModule, ShowCaseModule, MenuModule, RoadMapModule ,RedisModule ,WeatherModule],
 })
 export class AppModule {}

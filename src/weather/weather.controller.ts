@@ -1,11 +1,11 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, BadRequestException, NotFoundException } from '@nestjs/common';
 import { WeatherService } from './weather.service';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Weather')  
+@ApiTags('Weather')
 @Controller('weather')
 export class WeatherController {
-  constructor(private weatherService: WeatherService) {}
+  constructor(private weatherService: WeatherService) { }
 
   @Get()
   @ApiOperation({ summary: 'ข้อมูลสภาพอากาศปัจจุบัน' })
@@ -22,7 +22,13 @@ export class WeatherController {
       },
     },
   })
+  @ApiResponse({ status: 400, description: 'โปรดระบุชื่อเมือง (city)' })
+  @ApiResponse({ status: 404, description: 'ไม่พบเมืองที่ร้องขอ' })
   async getWeather(@Query('city') city: string) {
+    if (!city) {
+      throw new BadRequestException('กรุณาระบุ city');
+    }
+
     return this.weatherService.getWeather(city);
   }
 }
