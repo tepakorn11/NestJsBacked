@@ -1,4 +1,11 @@
-import { Injectable, Logger, BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+  HttpException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
@@ -6,47 +13,64 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class MenuService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
   private readonly logger = new Logger(MenuService.name);
 
   async createMenu(createMenuDto: CreateMenuDto) {
     try {
-      const _realData = createMenuDto || []
+      const _realData = createMenuDto;
+
+      const checkLevelId = await this.prisma.menu_list.findFirst({
+        where: {
+          level_id: _realData.level_id,
+          status: 'active',
+        },
+      });
+
+      if (checkLevelId) {
+        throw new BadRequestException(
+          `ระดับ (${_realData.level_id}) นี้ถูกใช้งานอยู่แล้ว`,
+        );
+      }
       const result = await this.prisma.menu_list.create({
         data: {
-          ..._realData
-        }
-      })
-      return result
+          ..._realData,
+        },
+      });
+      return result;
     } catch (error) {
       this.logger.error('❌ Failed to create menu_list', error.stack);
 
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('ไม่สามารถสร้างเมนูได้');
     }
   }
 
   async findAll(status: string) {
     try {
+      if (!status || status.length === 0) {
+        throw new BadRequestException('โปรด ระบุ status');
+      }
       const result = await this.prisma.menu_list.findMany({
-        where: { status }
-      })
-      return result
+        where: { status },
+      });
 
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
+      if (!result || result.length === 0) {
         throw new NotFoundException('ไม่พบรายการ');
       }
-      throw error;
+
+      return result;
+    } catch (error) {
+      if (error instanceof HttpException) { 
+        throw error;
+      }
+
+      throw new InternalServerErrorException('เกิดข้อผิดพลาดในการค้นหาข้อมูล');
     }
-
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} menu`;
-  }
-
 
   async update(id: number, updateMenuDto: UpdateMenuDto) {
     try {
@@ -57,18 +81,22 @@ export class MenuService {
         where: {
           NOT: { id },
           level_id: { not: null },
+          status: 'active',
         },
-        select: { level_id: true }, //ดึงเฉพาะ level_id
+        select: { level_id: true },
       });
 
-      const usedLevels = existingLevels.map((item) => item.level_id); // หาที่ level_id ตรงกัน
+      const usedLevels = existingLevels.map((item) => item.level_id);
 
-      const availableLevels = Array.from({ length: maxLevel }, (_, i) => i + 1).filter(
-        (lvl) => !usedLevels.includes(lvl), // สร้าง arry เปล่า maxที่ 5 ให้เริ่มต้นที่ iวนหา ที่ ไม่มีใน usedLevels
-      );
+      const availableLevels = Array.from(
+        { length: maxLevel },
+        (_, i) => i + 1,
+      ).filter((lvl) => !usedLevels.includes(lvl));
 
       if (typeof level_id !== 'number') {
-        throw new BadRequestException('กรุณาระบุลำดับเมนู (level_id) ให้ถูกต้อง');
+        throw new BadRequestException(
+          'กรุณาระบุลำดับเมนู (level_id) ให้ถูกต้อง',
+        );
       }
 
       if (!availableLevels.includes(level_id)) {
@@ -81,6 +109,7 @@ export class MenuService {
         where: {
           level_id: updateMenuDto.level_id,
           NOT: { id },
+          status: 'active',
         },
       });
 
@@ -102,22 +131,16 @@ export class MenuService {
 
   async remove(id: number) {
     try {
-      if (!id) throw new NotFoundException(`ไม่พบ ${id} ที่จะทำการลบ`)
-      const result = await this.prisma.menu_list.delete({
-        where: { id }
-      })
-      return result
-
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
-        throw new NotFoundException('ไม่พบรายการที่ต้องการลบ');
+      if (typeof id !== 'number' || isNaN(id)) {
+        throw new NotFoundException(`ไม่พบ ${id} ที่จะทำการลบ`);
       }
-      throw error;
+      const result = await this.prisma.menu_list.update({
+        where: { id },
+        data: { status: 'in-active' },
+      });
+      return result;
+    } catch (error) {
+      throw new InternalServerErrorException('ไม่สามารถลบเมนูได้');
     }
-
-
   }
 }

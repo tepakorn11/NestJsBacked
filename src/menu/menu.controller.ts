@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { MenuService } from './menu.service';
 import { CreateMenuDto } from './dto/create-menu.dto';
 import { UpdateMenuDto } from './dto/update-menu.dto';
@@ -8,13 +18,13 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
-  ApiQuery
+  ApiQuery,
 } from '@nestjs/swagger';
 
 @Controller('menu')
 @ApiTags('Menu')
 export class MenuController {
-  constructor(private readonly menuService: MenuService) { }
+  constructor(private readonly menuService: MenuService) {}
 
   @Post()
   @ApiOperation({ summary: 'สร้างเมนู' })
@@ -27,12 +37,13 @@ export class MenuController {
       'Create Menu': {
         value: {
           level_id: 1,
-          name: 'MyShop'
-        }
-      }
-    }
+          name: 'MyShop',
+          status: 'active',
 
-  },)
+        },
+      },
+    },
+  })
   create(@Body() createMenuDto: CreateMenuDto) {
     return this.menuService.createMenu(createMenuDto);
   }
@@ -41,16 +52,19 @@ export class MenuController {
   @ApiOperation({ summary: 'ดึงข้อเมนู' })
   @ApiResponse({ status: 200, description: 'พบรายการ' })
   @ApiResponse({ status: 500, description: 'มีข้อผิดพลาดบางอย่า' })
-  @ApiQuery({ name: 'status', required: false, description: 'สถานะเมนู เช่น active, in-active' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: 'สถานะเมนู เช่น active, in-active',
+  })
   findAll(@Query('status') status: string) {
     return this.menuService.findAll(status);
   }
 
-
   @Patch(':id')
   @ApiOperation({ summary: 'อัพเดทเมนู' })
-  @ApiResponse({status:200 , description:'update รายการเมนูสำเร็จ'})
-  @ApiResponse({status:500 , description:'เกิดข้อผิดพลาดบางอย่าง'})
+  @ApiResponse({ status: 200, description: 'update รายการเมนูสำเร็จ' })
+  @ApiResponse({ status: 500, description: 'เกิดข้อผิดพลาดบางอย่าง' })
   @ApiBody({
     description: 'อัพเดทเมนู',
     examples: {
@@ -59,10 +73,10 @@ export class MenuController {
           id: 1,
           level_id: 2,
           name: 'Account',
-          status: 'active'
-        }
-      }
-    }
+          status: 'active',
+        },
+      },
+    },
   })
   update(@Param('id') id: string, @Body() updateMenuDto: UpdateMenuDto) {
     return this.menuService.update(+id, updateMenuDto);
@@ -70,7 +84,8 @@ export class MenuController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'ลบทีละรายการ' })
-  remove(@Param('id') id: string) {
-    return this.menuService.remove(+id);
+  @ApiParam({ name: 'id', type: 'number', description: 'ID ของเมนู' })
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.menuService.remove(id);
   }
 }

@@ -7,6 +7,7 @@ import {
   IsString,
   Length,
   MaxLength,
+  Matches
 } from 'class-validator';
 
 export class UpdateShowCaseDto extends PartialType(CreateShowCaseDto) {
@@ -14,19 +15,22 @@ export class UpdateShowCaseDto extends PartialType(CreateShowCaseDto) {
   @IsNumber({}, { message: 'id ต้องเป็นตัวเลข' })
   id: number;
 
-  @ApiProperty({ example: 'active/in-active', description: 'เปิด/ปิด' })
+  @ApiPropertyOptional({ example: 'active/in-active', description: 'สถานะเมนู' })
+  @IsOptional()
   @IsString()
   status?: string;
 
-  @ApiProperty({ example: '2024-01-01', description: 'วันที่เริ่มทำงาน' })
+  @ApiPropertyOptional({ example: '2566', description: 'ปีเริ่มทำงาน (พ.ศ.)' })
   @IsOptional()
   @IsString()
-  @Length(10, 10, { message: 'วันที่ต้องเป็นรูปแบบ YYYY-MM-DD' })
-  start_working: string
+  @Length(4, 4)
+  @Matches(/^\d{4}$/, { message: 'ปีต้องเป็นตัวเลขเท่านั้น' })
+  start_working?: string;
 
-  @ApiProperty({ example: '2024-01-01', description: 'วันที่ออก (ถ้าถึงปัจจุบันไม่ต้องใส่)' })
+  @ApiPropertyOptional({ example: '2567', description: 'ปีสิ้นสุดการทำงาน (พ.ศ.)' })
   @IsOptional()
   @IsString()
-  @Length(10, 10, { message: 'วันที่ต้องเป็นรูปแบบ YYYY-MM-DD' })
-  end_working: string;
+  @Length(4, 4)
+  @Matches(/^\d{4}$/, { message: 'ปีต้องเป็นตัวเลขเท่านั้น' })
+  end_working?: string;
 }

@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UsePipes,
+} from '@nestjs/common';
 import { ShowCaseService } from './show-case.service';
 import { CreateShowCaseDto } from './dto/create-show-case.dto';
 import { UpdateShowCaseDto } from './dto/update-show-case.dto';
@@ -7,31 +17,37 @@ import {
   ApiOperation,
   ApiResponse,
   ApiParam,
-  ApiBody
+  ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { BuddhistDatePipe } from 'src/common/pipes/buddhist-date.pipe';
 
 @Controller('show-case')
 @ApiTags('Show Case')
 export class ShowCaseController {
-  constructor(private readonly showCaseService: ShowCaseService) { }
+  constructor(private readonly showCaseService: ShowCaseService) {}
 
   @Post()
-  @ApiOperation({ summary: 'สร้างรายการประสบการณ์การทำงาน'})
-  @ApiResponse({status:201 , description: 'สร้างรายการสำเร็จ'})
-  @ApiResponse({status:500 , description: 'ผิดพลาดจาก Server'})
-  @ApiBody({type:CreateShowCaseDto,
-    description:'รายการประสบการณ์การทำงานใหม่',
-    examples:{
+  @ApiOperation({ summary: 'สร้างรายการประสบการณ์การทำงาน' })
+  @ApiResponse({ status: 201, description: 'สร้างรายการสำเร็จ' })
+  @ApiResponse({ status: 500, description: 'ผิดพลาดจาก Server' })
+  @UsePipes(BuddhistDatePipe)
+  @ApiBody({
+    type: CreateShowCaseDto,
+    description: 'รายการประสบการณ์การทำงานใหม่',
+    examples: {
       'Create New List': {
         value: {
-          user_id:1,
-          year:2057,
-          title:'เรื่องของเรา',
-          description:'เรื่องของเรากับเธอกับฉัน',
-          icon:'mdi:robot'
-        }
-      }
-    }
+          start_working: 2559,
+          business_name: 'บริษัท บลูจินี่ จำกัด',
+          description: 'ออกแบบสื่อสิ่งพิมพ์โดยใช้ Photoshop และ Illustrator',
+          salary: 3000,
+          end_working: 2559,
+          status: 'active',
+          icon: 'mdi:robot',
+        },
+      },
+    },
   })
   create(@Body() createShowCaseDto: CreateShowCaseDto) {
     return this.showCaseService.create(createShowCaseDto);
@@ -39,8 +55,14 @@ export class ShowCaseController {
 
   @Get()
   @ApiOperation({ summary: 'ดึงประสบการณ์การทำงานทั้งหมด' })
-  findAll() {
-    return this.showCaseService.findAll();
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: 'สถานะเมนู เช่น active, in-active',
+    example: 'active',
+  })
+  findAll(@Query('status') status: string) {
+    return this.showCaseService.findAll(status);
   }
 
   @Get(':id')
@@ -50,8 +72,8 @@ export class ShowCaseController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'update ทีละหลายๆ รายการ'})
-    @ApiBody({
+  @ApiOperation({ summary: 'update ทีละหลายๆ รายการ' })
+  @ApiBody({
     type: CreateShowCaseDto,
     description: 'อัพเดทข้อมูลที่ละหลายๆการการ',
     examples: {
@@ -59,26 +81,29 @@ export class ShowCaseController {
         summary: 'ดึงข้อมูล ประสบการณ์การทำงาน',
         value: [
           {
-          id:1,
-          user_id: 1,
-          year: 2025,
-          title: 'ขายกบออนไล',
-          description: 'อะไรก็ได้ใส่ไปถอะ',
-          icon: 'mdi:robot'
-        },
-        {
-          id:2,
-          user_id: 1,
-          year: 2024,
-          title: 'เศร้า',
-          description: 'เศร้ามากโดนยืมแงแง',
-          icon: 'mdi:robot'
-        },
-      ]
-      }
-    }
+            id: 1,
+            user_id: 1,
+            year: 2025,
+            title: 'ขายกบออนไล',
+            description: 'อะไรก็ได้ใส่ไปถอะ',
+            icon: 'mdi:robot',
+          },
+          {
+            id: 2,
+            user_id: 1,
+            year: 2024,
+            title: 'เศร้า',
+            description: 'เศร้ามากโดนยืมแงแง',
+            icon: 'mdi:robot',
+          },
+        ],
+      },
+    },
   })
-  update(@Param('id') user_id: string, @Body() updateShowCaseDto: UpdateShowCaseDto[]) {
+  update(
+    @Param('id') user_id: string,
+    @Body() updateShowCaseDto: UpdateShowCaseDto[],
+  ) {
     return this.showCaseService.updateMany(+user_id, updateShowCaseDto);
   }
 

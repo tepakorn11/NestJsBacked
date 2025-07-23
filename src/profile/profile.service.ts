@@ -4,9 +4,6 @@ import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
 import  {IProfile ,ISocial} from "../interface/profile"
-
-import { toCamelCase } from 'utils/camel-case';
-
 @Injectable()
 export class ProfileService {
   constructor(private prisma: PrismaService) { }

@@ -1,0 +1,14 @@
+;  npm rum test -- --coverage
+
+; // dto  
+;  -- update  % ที่หายเกิดจาก extends มาจาก create dto 
+
+;  -- entity.ts เอาไว้กำหนด schema เอาไว้ใช้กับ DB ใช้กับพวก  TypeORM หรือ Sequelize
+
+; open coverage/lcov-report/index.html  ดูreprot
+
+
+; % Stmts	โค้ดที่ run ผ่าน test หรือไม่	ทุก statement เช่น let, console.log, etc.
+; % Branch	เงื่อนไขทุกทางเลือกถูกทดสอบหรือไม่	if, else, switch, `
+; % Funcs	ฟังก์ชันถูกเรียกจริงไหมตอน test	create(), findOne()
+; % Lines	บรรทัดของโค้ดที่มีการ execute หรือไม่	บรรทัดที่ถูก skip หรือ return

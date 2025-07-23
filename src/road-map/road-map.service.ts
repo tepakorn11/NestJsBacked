@@ -1,32 +1,32 @@
 import { CreateRoadMapDto } from './dto/create-road-map.dto';
 import { UpdateRoadMapDto } from './dto/update-road-map.dto';
-import { Injectable, Logger, BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-
 
 @Injectable()
 export class RoadMapService {
-  constructor(private prisma: PrismaService) { }
-  private readonly logger = new Logger(CreateRoadMapDto.name);
+  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(RoadMapService.name);
 
   async create(createRoadMapDto: CreateRoadMapDto) {
     try {
-      const _readData = createRoadMapDto || []
+      const _readData = createRoadMapDto;
 
       const created = await this.prisma.road_map.create({
         data: {
           ..._readData,
-          // year: new Date(_readData.year).getFullYear(),
-          // title: _readData.title,
-          // description: _readData.description,
-          // icon: _readData.icon
-        }
-      })
+        },
+      });
       return created;
-
     } catch (error) {
       this.logger.error('❌ Failed to create road map', error.stack);
-      throw error;
+      throw new InternalServerErrorException('เกิดข้อผิดพลาดในการสร้าง');
     }
   }
 
@@ -35,54 +35,62 @@ export class RoadMapService {
       const result = await this.prisma.road_map.findMany({
         orderBy: { year: 'asc' },
       });
-      if (!result) {
+      if (!result || result.length === 0) {
         throw new NotFoundException('ไม่พบรายการ');
       }
-      return (result);
-
+      return result;
     } catch (error) {
       this.logger.error('❌ Failed to find all road maps', error.stack);
-      throw error;
-
+      throw new InternalServerErrorException('เกิดข้อผิดพลดในการค้นหาข้อมูล');
     }
   }
 
   async findOne(id: number) {
     try {
-      const roadMap = await this.prisma.road_map.findUnique({
-        where: { id: id },
-      });
-      if (!roadMap) {
-        throw new NotFoundException(`ไม่พบแผนการพัฒนาทักษะที่มี ID: ${id}`);
-      }
-      return roadMap;
-    } catch (error) {
-      this.logger.error(`❌ Failed to find road map with id ${id}`, error.stack);
-      throw new NotFoundException(`ไม่พบแผนการพัฒนาทักษะที่มี ID: ${id}`);
+      const item = await this.prisma.road_map.findUnique({ where: { id } });
 
+      if (!item) {
+        throw new NotFoundException(`ไม่พบข้อมูลที่ ID: ${id}`);
+      }
+
+      return item;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error('Error at findOne', error.stack);
+      throw new InternalServerErrorException('เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์');
     }
   }
 
   async update(id: number, updateRoadMapDto: UpdateRoadMapDto[]) {
     const results: { id: number; status: string }[] = [];
-    this.logger.debug(updateRoadMapDto);
+
     try {
       for (const dto of updateRoadMapDto) {
         if (!dto.id) continue;
-        const result = await this.prisma.road_map.update({
-          where: { id: dto.id },
-          data: {
-            ...dto,
-          }
-        })
-      }
-      results.push({ id: id, status: 'success' });
-    } catch (error) {
-      this.logger.error(`❌ Failed to update road map with id ${id}`, error.stack);
-      throw new InternalServerErrorException(`ไม่สามารถอัปเดตแผนการพัฒนาทักษะที่มี ID: ${id}`);
 
+        await this.prisma.road_map.update({
+          where: { id: dto.id },
+          data: { ...dto },
+        });
+
+        results.push({ id: dto.id, status: 'success' });
+      }
+
+      return {
+        message: `อัปเดตสำเร็จ ${results.length} รายการ`,
+        details: results,
+      };
+    } catch (error) {
+      this.logger.error(
+        `❌ Failed to update road map with id ${id}`,
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        `ไม่สามารถอัปเดตแผนการพัฒนาทักษะที่มี ID: ${id}`,
+      );
     }
-    return `This action updates a #${id} roadMap`;
   }
 
   async remove(id: number) {
@@ -95,7 +103,10 @@ export class RoadMapService {
       }
       return roadMap;
     } catch (error) {
-      this.logger.error(`❌ Failed to remove road map with id ${id}`, error.stack);
+      this.logger.error(
+        `❌ Failed to remove road map with id ${id}`,
+        error.stack,
+      );
       throw new NotFoundException(`ไม่พบแผนการพัฒนาทักษะที่มี ID: ${id}`);
     }
   }
