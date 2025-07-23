@@ -39,7 +39,7 @@ export class ProfileController {
   @ApiOperation({ summary: 'ดึงข้อมูลโปรไฟล์ตาม ID' })
   @ApiParam({ name: 'id', description: 'รหัสโปรไฟล์' })
   findOne(@Param('id') id: string) {
-    return this.profileService.findOne(+id);
+    return this.profileService.findOne(+id)
   }
 
   @Patch(':id')
