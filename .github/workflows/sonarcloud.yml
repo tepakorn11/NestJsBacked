@@ -23,12 +23,13 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
-      - uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: 18
 
       - name: Install dependencies
-      - run: npm install
+        run: npm install
 
       - uses: SonarSource/sonarqube-scan-action@v1
         with:
