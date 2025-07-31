@@ -1,29 +1,32 @@
-name: SonarCloud Scan
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
 jobs:
   sonar-backend:
     name: Analyze NestJS Backend
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: .
+        working-directory: ./NestJsBacked
+
     steps:
       - uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+          
+      - name: Install dependencies
       - run: npm install
+
       - uses: SonarSource/sonarqube-scan-action@v1
         with:
           projectBaseDir: .
         env:
-          SONAR_TOKEN: ${{ secrets.SNYKKEYNEST }}
+          SONAR_TOKEN: ${{ secrets.SONARTOKENNEST }}
           SONAR_PROJECT_KEY: tepakorn11_NestJsBacked
           SONAR_ORGANIZATION: tepakorn11
-          SONAR_HOST_URL: https://sonarcloud.io 
+          SONAR_HOST_URL: https://sonarcloud.io
