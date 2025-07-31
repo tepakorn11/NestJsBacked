@@ -26,3 +26,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SNYKKEYNEST }}
           SONAR_PROJECT_KEY: tepakorn11_NestJsBacked
           SONAR_ORGANIZATION: tepakorn11
+          SONAR_HOST_URL: https://sonarcloud.io 
