@@ -1,3 +1,11 @@
+name: SonarCloud Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
 jobs:
   sonar-backend:
     name: Analyze NestJS Backend
@@ -18,7 +26,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          
+
       - name: Install dependencies
       - run: npm install
 
