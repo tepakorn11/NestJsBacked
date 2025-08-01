@@ -21,12 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 17
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -35,13 +29,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run SonarCloud Scan (Backend)
-        uses: SonarSource/sonarqube-scan-action@v1
+      - name: SonarCloud Scan (Backend)
+        uses: SonarSource/sonarcloud-github-action@v2
         with:
           projectBaseDir: .
-          args: -Dsonar.scanner.forceJava=true
         env:
           SONAR_TOKEN: ${{ secrets.SONARTOKENNEST }}
           SONAR_PROJECT_KEY: tepakorn11_NestJsBacked
           SONAR_ORGANIZATION: tepakorn11
           SONAR_HOST_URL: https://sonarcloud.io
+
