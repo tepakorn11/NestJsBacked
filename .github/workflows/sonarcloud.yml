@@ -33,9 +33,10 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@v2
         with:
           projectBaseDir: .
+          args: >
+            -Dsonar.projectKey=tepakorn11_NestJsBacked
+            -Dsonar.organization=tepakorn11
+            -Dsonar.host.url=https://sonarcloud.io
         env:
-          SONAR_TOKEN: ${{ secrets.SONARTOKENNEST }}
-          SONAR_PROJECT_KEY: tepakorn11_NestJsBacked
-          SONAR_ORGANIZATION: tepakorn11
-          SONAR_HOST_URL: https://sonarcloud.io
+          SONAR_TOKEN: ${{ secrets.SONARTOKENNEXT }}
 
