@@ -6,19 +6,13 @@ on:
   pull_request:
     branches: [ main ]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   pull-requests: read
 
 jobs:
   sonar-backend:
-    name: Analyze NestJS Backend
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,7 +38,6 @@ jobs:
           args: >
             -Dsonar.projectKey=tepakorn11_NestJsBacked
             -Dsonar.organization=tepakorn11
-            -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.sources=src
             -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**
             -Dsonar.qualitygate.wait=true
